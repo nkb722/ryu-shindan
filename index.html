@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="生年月日からわかる、あなたの龍の色。hanami｜龍脈カウンセラー">
+<meta property="og:title" content="あなたの龍の色診断">
+<meta property="og:description" content="自分の龍を知れば、進む道が見える。">
+<title>あなたの龍の色診断</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@600;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: one narrow column (max 460px) for phone in-app browsers — intro → birth date → result card → LINE */
+/* Single deliberate light look: 白藍 ground with a faint 青海波 pattern, 藍 ink, 金 accents; each result is tinted by its dragon color */
+:root{
+  --paper:#EEF4F6; --card:#FFFFFF; --ink:#24344D; --sub:#5E6E80; --rule:#D6E2E7;
+  --gold:#B8924A; --gold2:#D9BC7E; --gold-soft:#FBF6EC; --sakura:#F6E9EC;
+  --line:#06C755; --line-ink:#FFFFFF; --dragon:#3A5A80;
+  --display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{color:var(--ink)}
+html{background:var(--paper)}
+body{font-family:var(--body);font-size:16px;line-height:1.85;padding-inline:16px;padding-block:28px 56px;
+  background-color:var(--paper);
+  background-image:linear-gradient(180deg,rgba(255,255,255,.75),rgba(255,255,255,0) 340px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Cg fill='%23EEF4F6' stroke='%23D3E1E6' stroke-width='1'%3E%3Ccircle cx='0' cy='10' r='14'/%3E%3Ccircle cx='0' cy='10' r='9'/%3E%3Ccircle cx='0' cy='10' r='4'/%3E%3Ccircle cx='40' cy='10' r='14'/%3E%3Ccircle cx='40' cy='10' r='9'/%3E%3Ccircle cx='40' cy='10' r='4'/%3E%3Ccircle cx='20' cy='20' r='14'/%3E%3Ccircle cx='20' cy='20' r='9'/%3E%3Ccircle cx='20' cy='20' r='4'/%3E%3C/g%3E%3C/svg%3E");}
+main{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.mark{font-size:12px;letter-spacing:.24em;color:var(--gold);text-align:center}
+.mark::before,.mark::after{content:"";display:inline-block;width:28px;height:1px;background:var(--gold2);vertical-align:middle;margin:0 10px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,8.6vw,38px);line-height:1.35;text-align:center;margin:4px 0 0;text-wrap:balance;color:var(--ink)}
+.lede{text-align:center;color:var(--sub);margin:0;font-size:15px}
+#enso{display:block;width:min(240px,64vw);height:auto;aspect-ratio:1;margin:0 auto;max-width:100%}
+.card{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:20px 18px;box-shadow:0 6px 24px rgba(58,90,128,.08)}
+.card h2{font-family:var(--display);font-size:20px;margin:0 0 4px}
+.hint{font-size:13px;color:var(--sub);margin:0 0 14px}
+.date{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:8px}
+.date label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--sub);min-width:0}
+select{font:inherit;font-size:17px;padding:12px 10px;border:1px solid var(--rule);border-radius:10px;background:#fff;color:var(--ink);width:100%;min-width:0}
+select:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--gold2);outline-offset:2px}
+.go{margin-top:16px;width:100%;font:inherit;font-weight:700;font-size:17px;letter-spacing:.06em;padding:15px;border:0;border-radius:999px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(184,146,74,.35)}
+.go:active{transform:translateY(1px)}
+/* result */
+#result{display:flex;flex-direction:column;gap:18px}
+.res-head{text-align:center}
+.res-head .you{font-size:13px;color:var(--sub);letter-spacing:.12em}
+.res-head .name{font-family:var(--display);font-weight:800;font-size:clamp(40px,12vw,52px);line-height:1.2;color:var(--dragon);margin:2px 0 6px}
+.res-head .name.rainbow{background:linear-gradient(90deg,#D9534F,#E8A33D,#C9B33A,#4F9D69,#3D7EA6,#6A5AA8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.kw{display:flex;justify-content:center;flex-wrap:wrap;gap:6px}
+.kw span{font-size:13px;padding:2px 12px;border-radius:999px;border:1px solid var(--dragon);color:var(--dragon);background:var(--card)}
+.res-body p{margin:0}
+.res-body p+p{margin-top:12px}
+.label{font-size:12px;letter-spacing:.14em;color:var(--gold);display:block;margin-bottom:2px}
+.quote{font-family:var(--display);font-size:18px;line-height:1.7;border-left:3px solid var(--dragon);padding-left:12px}
+.msg{background:var(--gold-soft);border:1px solid var(--gold2);border-radius:12px;padding:14px 16px;font-family:var(--display);font-size:17px;line-height:1.9;text-align:center}
+.msg .label{text-align:center}
+.dir{margin-top:12px;padding-top:12px;border-top:1px dashed var(--gold2);font-family:var(--body)}
+.dir .dirs{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:6px 0 4px}
+.dir .dirs span{font-family:var(--display);font-size:20px;padding:2px 14px;border-radius:999px;background:var(--card);border:1px solid var(--gold2);color:var(--dragon)}
+.dir small{display:block;font-size:12px;color:var(--sub);line-height:1.6}
+.campaign{margin:-6px 0 0;font-size:13px;line-height:1.7;color:var(--ink);background:var(--gold-soft);border:1px solid var(--gold2);border-radius:12px;padding:10px 14px}
+.gift{background:var(--card);border:1px solid var(--rule);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 24px rgba(58,90,128,.08)}
+.gift h3{font-family:var(--display);font-size:18px;margin:0;text-align:center}
+.gift ol{margin:0;padding-left:1.3em;font-size:14.5px}
+.gift li{margin:4px 0}
+.sharebtn{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:16px;padding:13px;border-radius:999px;background:var(--dragon);color:#fff}
+.locked ul{margin:6px 0 0;padding-left:1.2em}
+.locked li{margin:4px 0}
+.cta{background:linear-gradient(180deg,#FFFFFF,var(--sakura));border:1px solid var(--gold2);color:var(--ink);border-radius:16px;padding:22px 18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 6px 24px rgba(184,146,74,.12)}
+.cta h3{font-family:var(--display);font-size:20px;margin:0;line-height:1.5;text-align:center}
+.cta p{margin:0;font-size:14.5px;color:var(--sub)}
+.word{display:flex;gap:8px;align-items:stretch}
+.word code{flex:1;font-family:var(--display);font-size:22px;text-align:center;background:var(--card);color:var(--dragon);border:1px solid var(--rule);border-radius:10px;padding:8px;user-select:all;min-width:0}
+.word button{font:inherit;font-size:14px;border:1px solid var(--gold2);background:var(--card);color:var(--gold);border-radius:10px;padding:0 14px;cursor:pointer;white-space:nowrap}
+.linebtn{display:block;text-align:center;text-decoration:none;font-weight:700;font-size:17px;padding:15px;border-radius:999px;background:var(--line);color:var(--line-ink);box-shadow:0 4px 14px rgba(6,199,85,.25)}
+.small{font-size:12.5px;color:var(--sub)}
+.row2{display:flex;gap:10px;flex-wrap:wrap}
+.ghost{flex:1 1 140px;text-align:center;font:inherit;font-size:14.5px;padding:11px;border-radius:999px;border:1px solid var(--rule);background:var(--card);color:var(--ink);text-decoration:none;cursor:pointer}
+.all{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.all div{text-align:center;font-family:var(--display);font-size:15px;padding:8px 4px;border-radius:10px;background:var(--card);border:1px solid var(--rule)}
+.all i{display:block;width:14px;height:14px;border-radius:50%;margin:0 auto 4px}
+footer{text-align:center;font-size:12px;color:var(--sub)}
+@media (prefers-reduced-motion:no-preference){#result:not([hidden]){animation:rise .5s ease both}@keyframes rise{from{opacity:.001;transform:translateY(8px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+
+
+<main>
+  <div class="mark">写 龍 ・ h a n a m i</div>
+  <h1>あなたの龍は、<br>9色のうち何色？</h1>
+  <p class="lede">生まれた日から、あなたについている龍の色と、その龍が持つ本質を読みます。30秒で終わります。</p>
+  <canvas id="enso" width="480" height="480" aria-hidden="true"></canvas>
+
+  <section class="card" id="form" aria-labelledby="f-h">
+    <h2 id="f-h">生年月日を選んでください</h2>
+    <p class="hint">入力した日付はこの画面の中だけで使い、どこにも送られません。</p>
+    <div class="date">
+      <label for="y">年<select id="y"></select></label>
+      <label for="m">月<select id="m"></select></label>
+      <label for="d">日<select id="d"></select></label>
+    </div>
+    <button class="go" id="go" type="button">龍の色を見る</button>
+  </section>
+
+  <section id="result" hidden aria-live="polite">
+    <div class="res-head">
+      <div class="you">あなたの龍は</div>
+      <div class="name" id="rName"></div>
+      <div class="kw" id="rKw"></div>
+    </div>
+    <div class="card res-body">
+      <p class="quote" id="rCopy"></p>
+      <p><span class="label">この龍の本質</span><span id="rCore"></span></p>
+      <p><span class="label">流れに乗れないと感じるとき</span><span id="rStuck"></span></p>
+      </div>
+    <div class="msg"><span class="label">あなたの龍からのことば</span><span id="rAct"></span>
+      <div class="dir"><span class="label" id="rDirLabel">今年、龍があなたを待っている方角</span>
+        <div class="dirs" id="rDirs"></div>
+        <small>今お住まいの場所から見た方角です。その方角にある神社へ行くと、龍に会いに行く旅になります。</small>
+      </div>
+    </div>
+
+    <div class="card locked">
+      <span class="label">ここから先は公式LINEでお届けします</span>
+      <ul>
+        <li>その方角にある、あなたが行くといい神社</li>
+        <li>あなたの龍が、今年どう動くか</li>
+        <li>あなたの龍が喜ぶ過ごし方</li>
+      </ul>
+    </div>
+
+    <div class="cta">
+      <h3>公式LINEで<br>あなたの龍の続きを受け取る</h3>
+      <p>友だち追加のあと、下の言葉をトークに送ってください。あなたの龍の詳しい解説が届きます。お住まいの都道府県も一緒に送ると、龍が待っている方角の神社をお伝えします。</p>
+      <div class="word"><code id="rWord"></code><button type="button" id="copy">コピー</button></div>
+      <a class="linebtn" id="lineBtn" href="#" target="_blank" rel="noopener">公式LINEを友だち追加する</a>
+      <p class="small" id="copyMsg">コピーできない場合は、上の言葉を長押しして選んでください。</p>
+    </div>
+
+    <div class="row2">
+      <a class="ghost" id="share" href="#" target="_blank" rel="noopener">Threadsでシェア</a>
+      <button class="ghost" id="again" type="button">もう一度診断する</button>
+    </div>
+    <p class="campaign" id="campaign">🎐 先着10名さま限定｜診断結果をThreadsでシェアしてくれた方に、龍脈鑑定の割引券をお届けします。シェアした画面を公式LINEに送ってくださいね。</p>
+
+    <div>
+      <span class="label" style="text-align:center">9色の龍</span>
+      <div class="all" id="all"></div>
+    </div>
+    <p class="small">2月3日〜5日生まれの方は、生まれた年の立春の日付によって色が変わります。この診断は立春の日付まで計算しています。</p>
+  </section>
+
+  <footer>hanami｜龍脈カウンセラー<br>自分の龍を知れば、進む道が見える。</footer>
+</main>
+
+<script>
+/* ===== 設定：公式LINEのURLをここに入れてください ===== */
+const LINE_URL = "https://line.me/R/ti/p/@474cdsmo";
+/* 先着10名の割引キャンペーン表示。10名に達したら false にする */
+const CAMPAIGN = true;
+/* ===================================================== */
+
+const DRAGONS = {
+ 1:{name:"水龍",color:"#2F6E91",kw:["流れを読む","しなやか","人の心に寄りそう"],
+    copy:"形を変えながら、どこへでも届く龍。",
+    core:"相手の気持ちを先に汲みとる力があります。目立たなくても、気づけば周りがあなたの流れに乗っている。それが水龍の本質です。",
+    stuck:"人に合わせすぎて、自分の流れが止まっているとき。水は止まると濁ります。",
+    act:"合わせるのは上手だ。だが今日は、お前の流れで進め。"},
+ 2:{name:"黒龍",color:"#2B2B2E",kw:["支える","育てる","粘り強い"],
+    copy:"大地の底で、すべてを支える龍。",
+    core:"人や物事を時間をかけて育てる力があります。すぐに結果が出なくても、あなたが関わったものは必ず根を張ります。",
+    stuck:"支える役ばかりで、自分を後回しにしているとき。黒龍は休むほど力を戻します。",
+    act:"支えてきた手を、今日は自分の肩に置け。"},
+ 3:{name:"青龍",color:"#2A6FB0",kw:["始める","勢い","まっすぐ"],
+    copy:"夜明けの東から昇る、始まりの龍。",
+    core:"誰より先に動き出せる力があります。考える前に体が動くのは、せっかちだからではなく、青龍が先に道を見ているからです。",
+    stuck:"失敗を恐れて、動く前に考えすぎているとき。青龍は止まると力を失います。",
+    act:"考えるより先に、一歩出よ。道は後からついてくる。"},
+ 4:{name:"翠龍",color:"#3E8E6A",kw:["ご縁をつなぐ","調和","風"],
+    copy:"風にのって、人と人を結ぶ龍。",
+    core:"人と人、場と場をつなぐ力があります。あなたがいると空気がやわらぐのは、翠龍が風を通しているからです。",
+    stuck:"みんなの意見を聞きすぎて、自分で決められないとき。風は向きを決めると強くなります。",
+    act:"全員の声を聞かなくていい。お前の風を吹かせよ。"},
+ 5:{name:"黄龍",color:"#B8860B",kw:["中心","統べる","再生"],
+    copy:"四方の龍の真ん中に座る、王の龍。",
+    core:"場の中心に立ち、すべてをまとめる力があります。どん底からでも立ち上がれるのは、黄龍が終わりと始まりを両方持っているからです。",
+    stuck:"全部を一人で背負おうとしているとき。中心にいる龍ほど、預けることで強くなります。",
+    act:"一人で持たなくていい。預けた分だけ、お前は大きくなる。"},
+ 6:{name:"白龍",color:"#7C8A99",kw:["誇り","天の力","まっすぐな志"],
+    copy:"天の高みから、まっすぐ降りてくる龍。",
+    core:"高い理想をかかげ、筋を通す力があります。完璧を求めてしまうのは、白龍が天の基準で物事を見ているからです。",
+    stuck:"自分にも人にも厳しくなりすぎているとき。白龍は「まあいいか」で空を飛べます。",
+    act:"完璧でなくていい。お前はもう、飛べる。"},
+ 7:{name:"赤龍",color:"#C0392B",kw:["喜び","言葉","豊かさ"],
+    copy:"笑い声のするほうへ、宝を運ぶ龍。",
+    core:"楽しむことで、人もお金も引き寄せる力があります。あなたが笑っている場所に、豊かさが集まります。",
+    stuck:"楽しむことに罪悪感を持っているとき。赤龍は我慢すると火が小さくなります。",
+    act:"笑え。お前が楽しむ場所に、宝は集まる。"},
+ 8:{name:"虹龍",color:"#6A5AA8",rainbow:true,kw:["夢を描く","可能性をひらく","人を巻きこむ"],
+    copy:"地上の願いを、虹の橋で天へ運ぶ龍。",
+    core:"まだ形のない夢を思い描き、誰も気づかない可能性を見つける力があります。あなたが夢を語ると人が集まり、道がひらけていく。人生の変わり目ほど輝くのが、虹龍の本質です。",
+    stuck:"「どうせ私なんて」と、自分の可能性を小さく閉じこめているとき。虹龍は殻の中では色を出せません。",
+    act:"夢を小さくするな。語れば、虹はかかる。"},
+ 9:{name:"紫龍",color:"#7B3F8C",kw:["直感","美","ひらめき"],
+    copy:"炎の奥で、未来を見通す龍。",
+    core:"一瞬で本質を見抜く直感と、美しいものを感じとる力があります。理由なく「こっち」と分かるのは、紫龍の目です。",
+    stuck:"直感を、頭で打ち消しているとき。紫龍は「なんとなく」を信じると動きます。",
+    act:"その「なんとなく」が答えだ。疑うな。"},
+};
+
+/* 立春の日（2月）: 寿星公式。20世紀 C=4.6295、21世紀 C=3.87 */
+function risshunDay(year){
+  const y = year % 100, C = year < 2000 ? 4.6295 : 3.87;
+  return Math.floor(y*0.2422 + C) - Math.floor((y-1)/4);
+}
+function honmei(year, month, day){
+  let y = year;
+  if (month === 1 || (month === 2 && day < risshunDay(year))) y -= 1;
+  let s = String(y).split('').reduce((a,b)=>a+Number(b),0);
+  while (s > 9) s = String(s).split('').reduce((a,b)=>a+Number(b),0);
+  let n = 11 - s; if (n > 9) n -= 9;
+  return n;
+}
+
+
+/* ===== 方位：その年の年盤から、本命星ごとの吉方位を出す ===== */
+const POS=['中央','北西','西','北東','南','北','南西','東','南東']; // 飛泊順
+const OPP={'北':'南','南':'北','東':'西','西':'東','北東':'南西','南西':'北東','北西':'南東','南東':'北西'};
+const SHI_DIR=['北','北東','北東','東','南東','南東','南','南西','南西','西','北西','北西']; // 子丑寅卯辰巳午未申酉戌亥
+const GOOD={1:[3,4,6,7],2:[6,7,8,9],3:[1,4,9],4:[1,3,9],5:[2,6,7,8,9],6:[1,2,7,8],7:[1,2,6,8],8:[2,6,7,9],9:[2,3,4,8]};
+function luckyDirs(star, today){
+  const ky = honmeiYear(today.getFullYear(), today.getMonth()+1, today.getDate());
+  const center = honmei(ky, 6, 1);
+  const where = {}; for(let i=0;i<9;i++){ where[((center-1+i)%9)+1] = POS[i]; }
+  const bad = new Set();
+  const g = where[5]; if(g!=='中央'){ bad.add(g); bad.add(OPP[g]); }           // 五黄殺・暗剣殺
+  bad.add(OPP[SHI_DIR[((ky-4)%12+12)%12]]);                                   // 歳破
+  const me = where[star]; if(me!=='中央'){ bad.add(me); bad.add(OPP[me]); }   // 本命殺・本命的殺
+  const order=['北','北東','東','南東','南','南西','西','北西'];
+  const res = GOOD[star].map(n=>where[n]).filter(d=>d!=='中央' && !bad.has(d));
+  return {year:ky, dirs: order.filter(d=>res.includes(d))};
+}
+function honmeiYear(year, month, day){ return (month===1 || (month===2 && day<risshunDay(year))) ? year-1 : year; }
+
+const $ = id => document.getElementById(id);
+const ySel=$('y'), mSel=$('m'), dSel=$('d');
+for(let y=Math.max(2026,new Date().getFullYear());y>=1930;y--) ySel.add(new Option(y+'年', y));
+for(let m=1;m<=12;m++) mSel.add(new Option(m+'月', m));
+ySel.value = 1975;
+function fillDays(){
+  const keep = Number(dSel.value)||1, n = new Date(Number(ySel.value), Number(mSel.value), 0).getDate();
+  dSel.innerHTML=''; for(let d=1; d<=n; d++) dSel.add(new Option(d+'日', d));
+  dSel.value = Math.min(keep, n);
+}
+ySel.addEventListener('change', fillDays); mSel.addEventListener('change', fillDays); fillDays();
+
+/* 墨の円相（enso） */
+const cv=$('enso'), cx=cv.getContext('2d');
+function drawEnso(color, rainbow){
+  cx.clearRect(0,0,480,480);
+  const R=170, steps=900, start=-2.2, sweep=Math.PI*1.86;
+  let seed=7; const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647};
+  const rb=['#D9534F','#E8A33D','#C9B33A','#4F9D69','#3D7EA6','#6A5AA8'];
+  for(let i=0;i<steps;i++){
+    const t=i/steps, a=start+sweep*t;
+    const w = 26*Math.sin(Math.PI*Math.min(1,t*1.15))*(0.75+0.25*Math.sin(t*9)) + 3;
+    const r = R + Math.sin(t*5)*4;
+    const x=240+Math.cos(a)*r, y=240+Math.sin(a)*r;
+    cx.globalAlpha = 0.05 + 0.10*(1-t);
+    cx.fillStyle = rainbow ? rb[Math.min(5,Math.floor(t*6))] : color;
+    for(let k=0;k<3;k++){ cx.beginPath(); cx.arc(x+(rnd()-.5)*w*.5, y+(rnd()-.5)*w*.5, w*(.4+rnd()*.25), 0, Math.PI*2); cx.fill(); }
+  }
+  cx.globalAlpha=1;
+}
+drawEnso('#3A5A80', false);
+
+/* 9色一覧 */
+$('all').innerHTML = Object.values(DRAGONS).map(d=>`<div><i style="background:${d.rainbow?'conic-gradient(#D9534F,#E8A33D,#C9B33A,#4F9D69,#3D7EA6,#6A5AA8,#D9534F)':d.color}"></i>${d.name}</div>`).join('');
+
+$('lineBtn').href = LINE_URL;
+$('campaign').hidden = !CAMPAIGN;
+
+$('go').addEventListener('click', ()=>{
+  const n = honmei(Number(ySel.value), Number(mSel.value), Number(dSel.value));
+  const d = DRAGONS[n];
+  document.documentElement.style.setProperty('--dragon', d.color);
+  const nm=$('rName'); nm.textContent=d.name; nm.classList.toggle('rainbow', !!d.rainbow);
+  $('rKw').innerHTML = d.kw.map(k=>`<span>${k}</span>`).join('');
+  $('rCopy').textContent=d.copy; $('rCore').textContent=d.core; $('rStuck').textContent=d.stuck; $('rAct').textContent='「'+d.act+'」';
+  $('rWord').textContent=d.name;
+  const L = luckyDirs(n, new Date());
+  $('rDirLabel').textContent = `${L.year}年、龍があなたを待っている方角`;
+  $('rDirs').innerHTML = L.dirs.length ? L.dirs.map(x=>`<span>${x}</span>`).join('') : '<span>公式LINEでお伝えします</span>';
+  const text = `私の龍は「${d.name}」でした🐉\n龍からのことば「${d.act}」\n今年の方角は ${L.dirs.join('・')}\n\nあなたの龍は何色？ @hanami_sharyu22`;
+  $('share').href = 'https://www.threads.net/intent/post?text=' + encodeURIComponent(text);
+  drawEnso(d.color, !!d.rainbow);
+  $('form').hidden = true; $('result').hidden = false;
+  $('copyMsg').textContent='コピーできない場合は、上の言葉を長押しして選んでください。';
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+$('again').addEventListener('click', ()=>{
+  $('result').hidden = true; $('form').hidden = false;
+  document.documentElement.style.setProperty('--dragon', '#3A5A80'); drawEnso('#3A5A80', false);
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+$('copy').addEventListener('click', ()=>{
+  const w=$('rWord').textContent;
+  const sel=()=>{const r=document.createRange(); r.selectNodeContents($('rWord')); const s=getSelection(); s.removeAllRanges(); s.addRange(r);};
+  try{
+    navigator.clipboard.writeText(w).then(()=>{$('copyMsg').textContent=`「${w}」をコピーしました。LINEのトークに貼り付けて送ってください。`;}, ()=>{sel(); $('copyMsg').textContent='選択しました。長押しでコピーしてください。';});
+  }catch(e){ sel(); }
+});
+</script>
+
+</body>
+</html>
